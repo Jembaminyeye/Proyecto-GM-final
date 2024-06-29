@@ -9,19 +9,15 @@ public class GameLluviaMenu extends Game {
     private BitmapFont font;
     private int higherScore;
 
-    //private static GameLluviaMenu instance;
-
     private GameLluviaMenu() {
     }
 
-    private static class SingletonHolder {
-        // Instancia única del Singleton
+    private static class SingletonHelper {
         private static final GameLluviaMenu INSTANCE = new GameLluviaMenu();
     }
 
-    // Método público para obtener la instancia única
     public static GameLluviaMenu getInstance() {
-        return SingletonHolder.INSTANCE;
+        return SingletonHelper.INSTANCE;
     }
 
     @Override
