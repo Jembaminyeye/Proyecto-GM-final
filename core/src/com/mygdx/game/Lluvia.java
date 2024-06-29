@@ -102,7 +102,6 @@ public class Lluvia {
         lastDropTime = TimeUtils.nanoTime();
     }
 
-
     private void crearGotaDeLluviaConBono() {
         FallingObject bonusObject = new FallingObject(bonusItemTexture, MathUtils.random(0, 800 - 64), 480, 64, 64) {
             @Override
@@ -135,11 +134,19 @@ public class Lluvia {
     }
 
     public void continuar() {
-        rainMusic.play();
+        if (bonusActive) {
+            bonusMusic.play();
+        } else {
+            rainMusic.play();
+        }
     }
 
     public void pausar() {
-        rainMusic.pause();
+        if (bonusActive) {
+            bonusMusic.pause();
+        } else {
+            rainMusic.pause();
+        }
     }
 
     public void destruir() {

@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -8,15 +10,18 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.graphics.Color;
 
 public class GameScreen implements Screen {
     final GameLluviaMenu game;
     private OrthographicCamera camera;
     private SpriteBatch batch;
     private BitmapFont font;
+    private BitmapFont pauseFont;
     private Bolsa bolsa;
     private Lluvia lluvia;
     private Texture textureFondo;
+    private PauseContext pauseContext;
 
     public GameScreen(final GameLluviaMenu game) {
         this.game = GameLluviaMenu.getInstance();
@@ -48,31 +53,49 @@ public class GameScreen implements Screen {
         batch = new SpriteBatch();
         bolsa.crear();
         lluvia.crear();
-    }
+        
+        pauseContext = new PauseContext(rainMusic);
 
+        pauseFont = new BitmapFont();
+        pauseFont.getData().setScale(3);
+        pauseFont.setColor(Color.RED);
+    }
+    
     @Override
     public void render(float delta) {
+        // Manejo de teclas para pausar y reanudar
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE) || Gdx.input.isKeyJustPressed(Input.Keys.P)) {
+            if (pauseContext.getState() instanceof PauseStrategy) {
+                pauseContext.resume();
+                lluvia.continuar();
+            } else {
+                pauseContext.pause();
+                lluvia.pausar();
+            }
+        }
+
         ScreenUtils.clear(0, 0, 0.2f, 1);
         camera.update();
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
         batch.draw(textureFondo, 0, 0, camera.viewportWidth, camera.viewportHeight);
-        font.draw(batch, "Monedas totales: " + bolsa.getPuntos(), 5, camera.viewportHeight - 25);
-        font.draw(batch, "Vidas : " + bolsa.getVidas(), camera.viewportWidth - 150, camera.viewportHeight - 25);
-        font.draw(batch, "HighScore : " + game.getHigherScore(), camera.viewportWidth / 2 - 50, camera.viewportHeight - 25);
+        font.draw(batch, "Monedas totales: " + bolsa.getPuntos(), 5, camera.viewportHeight - 10);
+        font.draw(batch, "Vidas : " + bolsa.getVidas(), camera.viewportWidth - 130, camera.viewportHeight - 10);
+        font.draw(batch, "HighScore : " + game.getHigherScore(), camera.viewportWidth / 2 - 30, camera.viewportHeight - 10);
 
-        if (!bolsa.estaHerido()) {
+        // Verificación del estado de pausa
+        if (!bolsa.estaHerido() && !(pauseContext.getState() instanceof PauseStrategy)) {
             bolsa.actualizar();
             if (!lluvia.actualizarMovimiento(bolsa)) {
                 if (game.getHigherScore() < bolsa.getPuntos()) {
                     game.setHigherScore(bolsa.getPuntos());
                 }
-                lluvia.detenerMusica(); 
-                // Cambiar a la pantalla de Game Over sin llamar a dispose() inmediatamente
+                lluvia.detenerMusica();
                 game.setScreen(new GameOverScreen(game));
-                // No llamamos a dispose() aquí
-                return; // Salir del método render para evitar llamadas adicionales
+                return;
             }
+        } else if (pauseContext.getState() instanceof PauseStrategy) {
+            pauseFont.draw(batch, "PAUSE", camera.viewportWidth / 2 - (50), camera.viewportHeight / 2 - (-20));
         }
 
         bolsa.dibujar(batch);
@@ -109,5 +132,6 @@ public class GameScreen implements Screen {
         lluvia.destruir();
         batch.dispose();
         font.dispose();
+        pauseFont.dispose();
     }
 }

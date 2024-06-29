@@ -46,7 +46,8 @@ public class GameOverScreen implements Screen {
         batch.begin();
         batch.draw(textureFondo, 0, 0, camera.viewportWidth, camera.viewportHeight); // Dibujar el fondo
         
-        font.draw(batch, "Toca en cualquier lado para reiniciar.", 20, camera.viewportHeight / 2 - 50);
+        font.draw(batch, "Toca en cualquier lado para reiniciar.", 50, camera.viewportHeight / 2 - 10);
+        font.draw(batch, "Tu Score : " + game.getHigherScore(), 50, camera.viewportHeight / 2 - (-20));
         batch.end();
 
         if (Gdx.input.isTouched()) {
